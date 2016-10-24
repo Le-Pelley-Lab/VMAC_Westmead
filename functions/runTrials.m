@@ -39,12 +39,12 @@ if realVersion
     fixationFixationTime = 0.7;       % Time that fixation cross must be fixated for trial to begin
     
     pracTrials = 8;
-    numExptBlocksPhase = [1, 8, 5]; %Phase 1 = practice, Phase 2 = mixed single and double distractor, Phase 3 = double distractor only
+    numExptBlocksPhase = [1, 8]; %Phase 1 = practice, Phase 2 = mixed single and double distractor, Phase 3 = double distractor only
     
     blocksPerBreak = 2;
     
-    singlePerBlock = [0, 7, 0];
-    doublePerBlock = [0, 4, 11];
+    singlePerBlock = [0, 12];
+    %doublePerBlock = [0, 4, 11];
     
 else
     
@@ -66,19 +66,19 @@ else
     fixationFixationTime = 0.005;
     
     pracTrials = 2;
-    numExptBlocksPhase = [1, 1, 1];
+    numExptBlocksPhase = [1, 1];
     
     blocksPerBreak = 1;
     
-    singlePerBlock = [0, 1, 0];
-    doublePerBlock = [0, 1, 1];
+    singlePerBlock = [0, 1];
+    %doublePerBlock = [0, 1, 1];
 end
 
 savingGazeData = false;
 
 if exptPhase == 1
     numTrials = pracTrials;
-    distractorType = 7;
+    distractorType = 3;
     exptTrialsPerBlock = pracTrials;
     trialTypeArray = ones(exptTrialsPerBlock, 1) * distractorType;
     winMultiplier = 0;
@@ -87,27 +87,28 @@ else
     if eyeVersion
         savingGazeData = true;
         trialEGarray = zeros(timeoutDuration(exptPhase) * 2 * 300, 27);
+        fixEGarray = zeros(fixationTimeoutDuration * 2 * 300, 27);
     end
     
-    numSingleDistractType = 4; % Two types of distractor (Omission/Yoked) for each of the different value levels (High, Low).
-    numDoubleDistractType = 2;
+    numSingleDistractType = 2;
+    %numDoubleDistractType = 2;
     
-    numTrialTypes = numSingleDistractType + numDoubleDistractType;
+    numTrialTypes = numSingleDistractType;
     
-    winMultiplier = zeros(4,1);     % winMultiplier is a bad name now; it's actually the amount that they win
+    winMultiplier = zeros(2,1);     % winMultiplier is a bad name now; it's actually the amount that they win
     winMultiplier(1) = bigMultiplier;         % High-val, omission distractors
-    winMultiplier(2) = bigMultiplier;     % High val, yoked distractors
-    winMultiplier(3) = smallMultiplier;         % Low value, omission
-    winMultiplier(4) = smallMultiplier;     % Low value, yoked
-    winMultiplier(5) = 0;   %double distractor high val, no reward given
-    winMultiplier(6) = 0;   %double distractor low val, no reward given
+    winMultiplier(2) = smallMultiplier;     % Low val, omission distractors
+%     winMultiplier(3) = smallMultiplier;         % Low value, omission
+%     winMultiplier(4) = smallMultiplier;     % Low value, yoked
+%     winMultiplier(5) = 0;   %double distractor high val, no reward given
+%     winMultiplier(6) = 0;   %double distractor low val, no reward given
     
     numSingleDistractPerBlock = singlePerBlock(exptPhase);
-    numDoubleDistractPerBlock = doublePerBlock(exptPhase);
+    %numDoubleDistractPerBlock = doublePerBlock(exptPhase);
     
     numExptBlocks = numExptBlocksPhase(exptPhase);
     
-    exptTrialsPerBlock = numSingleDistractType * numSingleDistractPerBlock + numDoubleDistractType * numDoubleDistractPerBlock;
+    exptTrialsPerBlock = numSingleDistractType * numSingleDistractPerBlock;
     
     trialTypeArray = zeros(exptTrialsPerBlock, 1);
     
@@ -119,12 +120,12 @@ else
         end
     end
     
-    for ii = numSingleDistractType + 1 : numSingleDistractType + numDoubleDistractType
-        for jj = 1 : numDoubleDistractPerBlock
-            loopCounter = loopCounter + 1;
-            trialTypeArray(loopCounter) = ii;
-        end
-    end
+%     for ii = numSingleDistractType + 1 : numSingleDistractType + numDoubleDistractType
+%         for jj = 1 : numDoubleDistractPerBlock
+%             loopCounter = loopCounter + 1;
+%             trialTypeArray(loopCounter) = ii;
+%         end
+%     end
     
     numTrials = numExptBlocks * exptTrialsPerBlock;
     
@@ -150,15 +151,15 @@ junkGazeCycles = junkFixationPeriod / trialPollingInterval;
 
 
 stimLocs = 6;       % Number of stimulus locations
-stim_size = 92;     % 92 Size of stimuli
+stim_size = dva2pix(2.3);%    % 92 Size of stimuli
 perfectDiam = stim_size + 10;   % Used in FillOval to increase drawing speed
 
-circ_diam = 200;    % Diameter of imaginary circle on which stimuli are positioned
+circ_diam = dva2pix(5.05); %200;    % Diameter of imaginary circle on which stimuli are positioned
 
-fix_size = 20;      % This is the side length of the fixation cross
-fix_aoi_radius = fix_size * 3;
+fix_size = dva2pix(0.5); %20;      % This is the side length of the fixation cross
+fix_aoi_radius = dva2pix(1.5); %fix_size * 3;
 
-gazePointRadius = 10;
+gazePointRadius = fix_size/2; %10;
 
 
 
@@ -199,13 +200,13 @@ sessionPay = 0;
 trialCounter = 0;
 block = 1;
 trials_since_break = 0;
-DATA.fixationTimeouts = [0, 0, 0];
-DATA.trialTimeouts = [0, 0, 0];
+DATA.fixationTimeouts = [0, 0];
+DATA.trialTimeouts = [0, 0];
 
-if exptPhase > 1
-    omissionTracker = zeros(9,numSingleDistractPerBlock);
-    omissionCounter = zeros(9,1);
-end
+% if exptPhase > 1
+%     omissionTracker = zeros(9,numSingleDistractPerBlock);
+%     omissionCounter = zeros(9,1);
+% end
 
 if eyeVersion
     tetio_startTracking;
@@ -233,19 +234,19 @@ for trial = 1 : numTrials
     targetLoc = randi(stimLocs);
     
     distractLoc = targetLoc;
-    while distractLoc == targetLoc || abs(distractLoc - targetLoc) == 3 %distractor is either next to target or removed from target by 1
+    while distractLoc == targetLoc  %distractor cannot be at the target location
         distractLoc = randi(stimLocs);
     end
     
     distractType = shTrialTypeArray(trialCounter);
     
     
-    secondDistractLoc = targetLoc - (distractLoc - targetLoc);      %second distractor location is a mirror image of the first
-    if secondDistractLoc < 1
-        secondDistractLoc = secondDistractLoc + stimLocs;
-    elseif secondDistractLoc > stimLocs
-        secondDistractLoc = secondDistractLoc - stimLocs;
-    end
+%     secondDistractLoc = targetLoc - (distractLoc - targetLoc);      %second distractor location is a mirror image of the first
+%     if secondDistractLoc < 1
+%         secondDistractLoc = secondDistractLoc + stimLocs;
+%     elseif secondDistractLoc > stimLocs
+%         secondDistractLoc = secondDistractLoc - stimLocs;
+%     end
     
     postFixationPause = blankScreenAfterFixationPause; %UPDATED IN LINE WITH FAILING ET AL. 14/01/16
     
@@ -257,8 +258,8 @@ for trial = 1 : numTrials
         Screen('FillOval', stimWindow, gray, stimRect(i,:), perfectDiam);       % Draw stimulus circles
         aoiRadius(i) = distractorAOIradius;     % Set large AOIs around all locations (we'll change the AOI around the target location in a minute)
     end
-    Screen('FillOval', stimWindow, distract_col(distractType,1:3), stimRect(distractLoc,:), perfectDiam);      % Draw first coloured circle in distractor 1 location
-    Screen('FillOval', stimWindow, distract_col(distractType,4:6), stimRect(secondDistractLoc,:), perfectDiam);  %Draw second coloured circle in distractor 2 location
+    Screen('FillOval', stimWindow, distract_col(distractType,:), stimRect(distractLoc,:), perfectDiam);      % Draw first coloured circle in distractor 1 location
+    %Screen('FillOval', stimWindow, distract_col(distractType,4:6), stimRect(secondDistractLoc,:), perfectDiam);  %Draw second coloured circle in distractor 2 location
     Screen('DrawTexture', stimWindow, diamondTex, [], stimRect(targetLoc,:));       % Draw diamond in target location
     
     aoiRadius(targetLoc) = targetAOIradius;     % Set a special (small) AOI around the target
@@ -280,16 +281,25 @@ for trial = 1 : numTrials
     fixationBadSamples = 0;
     fixationTimeout = 0;
     gazeCycle = 0;
+    arrayRowCounter = 2;    % Used to write EG data to the correct rows of an array. Starts at 2 because we write the first row in separately below (line marked ***)
     
     startFixationTime = Screen(MainWindow, 'Flip', [], 1);     % Present fixation cross
     
+    if savingGazeData
+        fixEGarray(:,:) = 0;
+    end
+    
     if eyeVersion
         
-        [~, ~, ts, ~] = tetio_readGazeData; % Empty eye tracker buffer
+        [lefteye, righteye, ts, ~] = tetio_readGazeData; % Empty eye tracker buffer
         startEyePeriod = double(ts(end));  % Take the timestamp of the last element in the buffer as the start of the trial. Need to convert to double so can divide by 10^6 later to change to seconds
         startFixationTimeoutPeriod = startEyePeriod;
         
         currentGazePoint = zeros(1,2);
+        
+        if savingGazeData
+            fixEGarray(1,:) = [double(ts(length(ts))), lefteye(length(ts),:), righteye(length(ts),:)];       % *** First row of saved EG array gives start time
+        end
         
         
         while fixated_on_fixation_cross == 0
@@ -299,12 +309,21 @@ for trial = 1 : numTrials
             WaitSecs(fixationPollingInterval);      % Pause between updates of eye position
             [lefteye, righteye, ts, ~] = tetio_readGazeData;    % Get eye-tracker data since previous call
             
+            
+            
             if isempty(ts) == 0
                 
                 
                 [eyeX, eyeY, validPoints] = findMeanGazeLocation(lefteye, righteye, length(ts));    % Find mean gaze location during the previous polling interval
                 
                 gazeCycle = gazeCycle + 1;
+                
+                endPoint = fixArrayRowCounter + length(ts) - 1;
+                if savingGazeData
+                    fixEGarray(fixArrayRowCounter:endPoint,:) = [double(ts), lefteye, righteye];
+                end
+                
+                fixArrayRowCounter = endPoint + 1;
                 
                 if validPoints > 0
                     if gazeCycle <= junkGazeCycles
@@ -467,7 +486,7 @@ for trial = 1 : numTrials
     omissionTrial = 0;
     trialPay = 0;
     lookedAtMainDistractor = 0;
-    lookedAtSecondDistractor = 0;
+    %lookedAtSecondDistractor = 0;
     
     if trialEnd == 2
         timeout = 1;
@@ -480,28 +499,12 @@ for trial = 1 : numTrials
         
         if exptPhase ~= 1       % If this is NOT practice
             
-            omissionCounter(distractType,1) = omissionCounter(distractType,1) + 1;
+            %omissionCounter(distractType,1) = omissionCounter(distractType,1) + 1;
             
             if timeOnLoc(distractLoc) > omissionTimeLimit          % If people have looked at the distractor location (includes trials with no distractor actually presented)
-                switch distractType
-                    case {2,4}
-                        omissionTrial = omissionTracker(distractType, omissionCounter(distractType,1));
-                        %%% yoked stuff
-                    case {1,3}
-                        omissionTrial = 1;
-                        omissionTracker(distractType,omissionCounter(distractType,1)) = 1;
-                    otherwise
-                        omissionTrial = 0;
-                end
-                lookedAtMainDistractor = 1;
-            else
-                if distractType == 2 || distractType == 4 %if participant didnt look at the distractor, but due to have a yoked omission trial
-                    omissionTrial = omissionTracker(distractType, omissionCounter(distractType,1));
-                end
+                 omissionTrial = 1;
             end
-            if timeOnLoc(secondDistractLoc) > omissionTimeLimit
-                lookedAtSecondDistractor = 1;
-            end
+
             
             if rt > softTimeoutDuration      % If RT is greater than the "soft" timeout limit, don't get reward (but also don't get explicit timeout feedback)
                 softTimeoutTrial = 1;
@@ -520,27 +523,14 @@ for trial = 1 : numTrials
             end
             
             sessionPay = sessionPay + trialPay;
-            if distractType < 5
-                fbStr = ['+', num2str(trialPay), ' ', centCents];
-                Screen('TextSize', MainWindow, 36);
-                DrawFormattedText(MainWindow, [separatethousands(sessionPay+starting_total_points, ','), ' points total'], 'center', 760, white);
-            elseif distractType < 7
-                fbStr = 'CORRECT';
-            end
+
+            fbStr = ['+', num2str(trialPay), ' ', centCents];
+            Screen('TextSize', MainWindow, 36);
+            DrawFormattedText(MainWindow, [separatethousands(sessionPay+starting_total_points, ','), ' points total'], 'center', 760, white);
+
             
             if softTimeoutTrial == 1
-                if distractType < 5
-                    fbStr = ['+', num2str(trialPay), ' ', centCents,'\n\nToo slow'];
-                elseif distractType < 7 %for double distractor trials, no feedback about points
-                    fbStr = ['CORRECT\n\nToo slow, please try to look at the diamond more quickly'];
-                end
-                
-            elseif lookedAtMainDistractor == 1
-                
-                if distractType <5
-                    fbStr = ['+', num2str(trialPay), ' ', centCents,'\n\nYou looked at the ', strtrim(colourName(distractType,:)), ' circle'];
-                end
-                
+                fbStr = ['+', num2str(trialPay), ' ', centCents,'\n\nToo slow'];
             end
             
             
@@ -562,7 +552,7 @@ for trial = 1 : numTrials
     %     Screen('Flip', MainWindow);
     %     WaitSecs(iti);
     
-    trialData = [block, trial, trialCounter, trials_since_break, targetLoc, distractLoc, secondDistractLoc, fixationTime, fixationPropGoodSamples, fixationTimeout, trialPropGoodSamples, timeout, softTimeoutTrial, omissionTrial, lookedAtMainDistractor, lookedAtSecondDistractor, rt, trialPay, sessionPay, distractType, timeOnLoc(1,:)];
+    trialData = [block, trial, trialCounter, trials_since_break, targetLoc, distractLoc, fixationTime, fixationPropGoodSamples, fixationTimeout, trialPropGoodSamples, timeout, softTimeoutTrial, omissionTrial, rt, trialPay, sessionPay, distractType, timeOnLoc(1,:)];
     
     if trial == 1
         DATA.trialInfo(exptPhase).trialData = zeros(numTrials, size(trialData, 2));
@@ -577,9 +567,11 @@ for trial = 1 : numTrials
     
     if savingGazeData
         EGdatafilename = [EGdataFilenameBase, 'Ph', num2str(exptPhase), 'T', num2str(trial), '.mat'];
-        
+        FIXdatafilename = [EGdataFilenameBase, 'Ph', num2str(exptPhase), 'T', num2str(trial), '_FIX.mat'];
+        FIXDATA = fixEGarray(1:fixArrayRowCounter-1,:);
         GAZEDATA = trialEGarray(1:arrayRowCounter-1,:);
-        save(EGdataFilename, 'GAZEDATA');
+        save(EGdatafilename, 'GAZEDATA');
+        save(FIXdatafilename, 'FIXDATA');
     end
     
     RestrictKeysForKbCheck(KbName('c'));
@@ -607,14 +599,14 @@ for trial = 1 : numTrials
     if mod(trial, exptTrialsPerBlock) == 0
         shTrialTypeArray = shuffleTrialorder(trialTypeArray, exptPhase);     % Re-shuffle order of distractors
         trialCounter = 0;
-        omissionCounter = zeros(8,1);
+        %omissionCounter = zeros(8,1);
         DATA.blocksCompleted = block;
         block = block + 1;
-        if exptPhase > 1
-            omissionTracker(2,:) = omissionTracker(1,randperm(length(omissionTracker(1,:)))); %randomise order of high val trials for irrelevant cue
-            omissionTracker(4,:) = omissionTracker(3,randperm(length(omissionTracker(3,:)))); %randomise order of low val trials for irrelevant cue
-            omissionTracker([1,3,5:8],:) = zeros(6,numSingleDistractPerBlock);
-        end
+        %if exptPhase > 1
+         %   omissionTracker(2,:) = omissionTracker(1,randperm(length(omissionTracker(1,:)))); %randomise order of high val trials for irrelevant cue
+          %  omissionTracker(4,:) = omissionTracker(3,randperm(length(omissionTracker(3,:)))); %randomise order of low val trials for irrelevant cue
+           % omissionTracker([1,3,5:8],:) = zeros(6,numSingleDistractPerBlock);
+        %end
         %Beeper;
     end
     

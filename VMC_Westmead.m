@@ -24,9 +24,11 @@ global orange green blue pink sessionPoints
 
 global realVersion
 global eyeVersion
+global laptopVersion viewDistance monitorDims
 
 eyeVersion = false; % set to true to test eyetracking
-realVersion = true; % set to true for correct numbers of trials etc.
+realVersion = false; % set to true for correct numbers of trials etc.
+laptopVersion = false; % set to true to scale stimuli for laptop screen dimensions
 
 commandwindow;
 
@@ -36,11 +38,24 @@ if realVersion
     awareInstrPause = 18;
 else
     screens = Screen('Screens');
-    screenNum = max(screens);
+    screenNum = 1; %max(screens);
     Screen('Preference', 'SkipSyncTests', 2); %Skips PTB calibrations
     fprintf('\n\nEXPERIMENT IS BEING RUN IN DEBUGGING MODE!!! IF YOU ARE RUNNING A ''REAL'' EXPT, QUIT AND CHANGE realVersion TO true\n\n');
     awareInstrPause = 1;
 end
+
+if laptopVersion
+    DPI = 96; % will probably need to change
+    viewDistance = 60; %viewing distance in cm
+else
+    DPI = 96;
+    viewDistance = 60; %viewing distance in cm
+end
+
+set(0, 'ScreenPixelsPerInch', DPI);
+set(0, 'units', 'centimeters');
+monitorDims = get(0, 'screensize');
+monitorDims = monitorDims(3:4);
 
 bigMultiplier = 500;    % Points multiplier for trials with high-value distractor
 smallMultiplier = 10;   % Points multiplier for trials with low-value distractor
@@ -94,7 +109,22 @@ if realVersion
         
         p_number = input('Participant number  ---> ');
         
-        datafilename = ['BehavData\VMC_BC_2S_dataP', num2str(p_number)];
+        group = 'a';
+        while group ~= 'Y' && group ~= 'y' && group ~= 'N' && group ~= 'n'
+            group = input('Control subject? (Y/N) --- > ', 's');
+            if isempty(group);
+                group = 'a';
+            elseif group == 'y' || group == 'Y'
+                 groupFileEnd = '_C';
+                 p_group = 2; % 2 = control
+            elseif group == 'n' || group == 'N'
+                groupFileEnd = '_P';
+                p_group = 1; % 1 = patient
+            end
+        end
+        
+        
+        datafilename = ['BehavData\VMC_Westmead_dataP', num2str(p_number), groupFileEnd];
         
         
         if exist([datafilename, '.mat'], 'file') == 2
@@ -106,8 +136,8 @@ if realVersion
     end
     
     colBalance = 0;
-    while colBalance < 1 || colBalance > 4
-        colBalance = input('Counterbalance (1-4)---> ');
+    while colBalance < 1 || colBalance > 2
+        colBalance = input('Counterbalance (1-2)---> ');
         if isempty(colBalance); colBalance = 0; end
     end
     
@@ -136,6 +166,7 @@ else
     
     p_number = 1;
     colBalance = 1;
+    p_group = 3;
     p_sex = 'm';
     p_genderInfo = 'male';
     p_age = 123;
@@ -143,7 +174,7 @@ else
     
 end
 
-datafilename = ['BehavData\VMC_BC_unRew_dataP', num2str(p_number), '.mat'];
+datafilename = [datafilename, '.mat'];
 
 starting_total_points = 0;
 
@@ -154,6 +185,7 @@ DATA.age = p_age;
 DATA.sex = p_sex;
 DATA.genderInfo = p_genderInfo;
 DATA.hand = p_hand;
+DATA.group = p_group;
 DATA.start_time = datestr(now,0);
 if eyeVersion
     DATA.trackerID = trackerId;
@@ -165,9 +197,17 @@ DATA.actualBonusSession = 0;
 
 if eyeVersion
     EGfolderName = 'Data\EyeData';
-    EGsubfolderNameString = ['P',num2str(p_number)];
-    mkdir(EGfolderName, EGsubfolderNameString);
-    EGdataFilenameBase = [EGfolderName, '\', EGsubfolderNameString, '\GazeData', EGsubfolderNameString];
+    if p_group == 1
+        EGgroupfolderNameString = 'Pat';
+    else
+        EGgroupfolderNameString = 'Con';
+    end
+    EGsubfolderNameString = ['\P', num2str(p_number)];
+    if exist([EGfolderName,'\', EGgroupfolderNameString], 'dir') ~= 7
+        mkdir(EGfolderName, EGgroupfolderNameString);
+    end        
+    mkdir(EGgroupfolderNameString, EGsubfolderNameString);
+    EGdataFilenameBase = [EGfolderName, '\', EGgroupfolderNameString, EGsubfolderNameString, '\GazeData', EGsubfolderNameString];
 end
 
 % *******************************************************
@@ -203,43 +243,18 @@ pink = [193 87 135];
 yellow = [255 255 0];
 Screen('FillRect',MainWindow, black);
 
-distract_col = zeros(7,6);
+distract_col = zeros(3,3);
 
-distract_col(7,:) = [yellow gray];       % Practice colour
+distract_col(3,:) = yellow;       % Practice colour
 switch colBalance
     case 1
-        distract_col(1,:) = [orange gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(2,:) = [blue gray];      % Low-value distractor colour, second colour is the irrelevant distractor
-        distract_col(3,:) = [green gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(4,:) = [pink gray];
-        distract_col(5,:) = [orange blue];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(6,:) = [green pink];
-        
-        colourName = char('ORANGE','BLUE','GREEN','PINK');
+        distract_col(1,:) = orange;      % High-value distractor colour, second colour is the irrelevant distractor
+        distract_col(2,:) = blue;      % Low-value distractor colour, second colour is the irrelevant distract
+        colourName = char('ORANGE','BLUE');
     case 2
-        distract_col(1,:) = [blue gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(2,:) = [orange gray];      % Low-value distractor colour, second colour is the irrelevant distractor
-        distract_col(3,:) = [pink gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(4,:) = [green gray];
-        distract_col(5,:) = [blue orange];
-        distract_col(6,:) = [pink green];
-        colourName = char('BLUE','ORANGE','PINK','GREEN');
-    case 3
-        distract_col(1,:) = [green gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(2,:) = [pink gray];      % Low-value distractor colour, second colour is the irrelevant distractor
-        distract_col(3,:) = [orange gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(4,:) = [blue gray];
-        distract_col(5,:) = [green pink];
-        distract_col(6,:) = [orange blue];
-        colourName = char('GREEN','PINK','ORANGE','BLUE');
-    case 4
-        distract_col(1,:) = [pink gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(2,:) = [green gray];      % Low-value distractor colour, second colour is the irrelevant distractor
-        distract_col(3,:) = [blue gray];      % High-value distractor colour, second colour is the irrelevant distractor
-        distract_col(4,:) = [orange gray];
-        distract_col(5,:) = [pink green];
-        distract_col(6,:) = [blue orange];
-        colourName = char('PINK','GREEN','BLUE','ORANGE');
+        distract_col(1,:) = blue;      % High-value distractor colour, second colour is the irrelevant distractor
+        distract_col(2,:) = orange;      % Low-value distractor colour, second colour is the irrelevant distractor
+        colourName = char('BLUE','ORANGE');
 end
 
 phaseLength = zeros(3,1);
@@ -264,8 +279,9 @@ Screen(MainWindow, 'Flip');
 RestrictKeysForKbCheck(KbName('t'));   % Only accept T key to continue
 KbWait([], 2);
 
+exptInstructions;
+
 if realVersion
-    exptInstructions;
     save(datafilename, 'DATA');
 end
 
@@ -283,37 +299,37 @@ end
 pressSpaceToBegin;
 
 phaseLength(2) = runTrials(2);
-phaseLength(3) = runTrials(3);
+%phaseLength(3) = runTrials(3);
 
 awareInstructions;
 awareTest;
 
-sessionBonus = sessionPoints / 160;   % convert points into cents at rate of 13 000 points = $1. Updated 13/5.
+%sessionBonus = sessionPoints / 160;   % convert points into cents at rate of 13 000 points = $1. Updated 13/5.
 
-sessionBonus = 10 * ceil(sessionBonus/10);        % ... round this value UP to nearest 10 cents
-sessionBonus = sessionBonus / 100;    % ... then convert back to dollars
+%sessionBonus = 10 * ceil(sessionBonus/10);        % ... round this value UP to nearest 10 cents
+%sessionBonus = sessionBonus / 100;    % ... then convert back to dollars
 
-DATA.session_Bonus = sessionBonus;
+%DATA.session_Bonus = sessionBonus;
 DATA.session_Points = sessionPoints;
 
-totalBonus = starting_total + sessionBonus;
+%totalBonus = starting_total + sessionBonus;
 
-if totalBonus < 7.10        %check to see if participant earned less than $10.10; if so, adjust payment upwards
-    actual_bonus_payment = 7.10;
-else
-    actual_bonus_payment = totalBonus;
-end
-
-DATA.totalBonus = totalBonus;
-DATA.actualTotalBonus = actual_bonus_payment;
+% if totalBonus < 7.10        %check to see if participant earned less than $10.10; if so, adjust payment upwards
+%     actual_bonus_payment = 7.10;
+% else
+%     actual_bonus_payment = totalBonus;
+% end
+% 
+% DATA.totalBonus = totalBonus;
+% DATA.actualTotalBonus = actual_bonus_payment;
 DATA.end_time = datestr(now,0);
 
 save(datafilename, 'DATA');
 
-[~, ny, ~] = DrawFormattedText(MainWindow, ['SESSION COMPLETE\n\nPoints in this session = ', separatethousands(sessionPoints, ','), '\n\nTOTAL PAYMENT = $', num2str(actual_bonus_payment, '%0.2f')], 'center', 'center' , white, [], [], [], 1.4);
+[~, ny, ~] = DrawFormattedText(MainWindow, ['SESSION COMPLETE\n\nPoints in this session = ', separatethousands(sessionPoints, ',')], 'center', 'center' , white, [], [], [], 1.4);
 
 fid1 = fopen('BehavData\_TotalBonus_summary.csv', 'a');
-fprintf(fid1,'%d,%f\n', p_number, actual_bonus_payment + starting_total);
+fprintf(fid1,'%d,%f\n', p_number, sessionPoints);
 fclose(fid1);
 
 DrawFormattedText(MainWindow, '\n\nPlease fetch the experimenter', 'center', ny , white, [], [], [], 1.5);
@@ -321,10 +337,10 @@ DrawFormattedText(MainWindow, '\n\nPlease fetch the experimenter', 'center', ny 
 Screen(MainWindow, 'Flip');
 
 if eyeVersion
-    overallEGdataFilename = [EGfolderName, '\GazeData', EGsubfolderNameString, '.mat'];
+    overallEGdataFilename = [EGfolderName, '\', EGgroupfolderNameString, '\GazeData', EGsubfolderNameString, '.mat'];
     
     minPhase = 2;
-    maxPhase = 3;
+    maxPhase = 2;
     
     for exptPhase = minPhase:maxPhase
         
@@ -337,7 +353,7 @@ if eyeVersion
     end
     
     save(overallEGdataFilename, 'ALLGAZEDATA');
-    rmdir([EGfolderName,'\', EGsubfolderNameString], 's');
+    rmdir([EGfolderName,'\', EGgroupfolderNameString, EGsubfolderNameString], 's');
 end
 
 RestrictKeysForKbCheck(KbName('q'));   % Only accept Q key to quit

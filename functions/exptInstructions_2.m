@@ -9,38 +9,45 @@ global trialCounter
 
 
 instructStr = {'The rest of this experiment is similar to the trials you have just completed. On each trial, you should move your eyes to the DIAMOND shape as quickly and directly as possible.', ...
-    ['From now on, you will be able to earn points for correct responses. On each trial you will earn either 0 points, ', num2str(smallMultiplier), ' ', centOrCents, ', or ', num2str(bigMultiplier), ...
+    ['From now on, you will be able to earn money for correct responses. On each trial you will earn either 0 points, ', num2str(smallMultiplier), ' ', centOrCents, ', or ', num2str(bigMultiplier), ...
     ' points. \n\nThe amount that is available for you to earn will depend on the coloured circle(s) that are presented on the trial: '], ...
     ['If you take longer than ', num2str(round(softTimeoutDuration * 1000)), ' milliseconds to move your eyes to the diamond, you will receive no points. So you will need to move your eyes quickly!'], ...
-    'After each trial you will be told how many points you won, and your total points earned so far in this session.\n\nYour aim in this task is to earn as many points as possible.'};
-
+    ['If you accidentally look at the ', strtrim(colourName(1,:)), ' or ', strtrim(colourName(3,:)), ' circle before you look at the diamond, you will receive no points. So you should try as hard as possible not to look at these circles.' ...
+    '\n\nAccidentally looking at the ', strtrim(colourName(2,:)), ' or ', strtrim(colourName(4,:)), ' circle will not affect the number of points that you earn for the trial.'], ...
+    'On some trials, there will be two coloured circles present in the display. An example is shown below.\n\nOn these trials, you should still try to move your eyes to the diamond as quickly and accurately as possible, however you will not receive any reward on these trials.', ...
+    'After each trial you will be told how many points you won, and your total points earned so far in this session.', ...
+    'At the end of the session the number of points that you have earned will be used to calculate your total reward payment. \n\n Most participants are able to earn between $7 and $15 in the experiment.'};
+    
+instructStr7 = 'How much would you receive if you moved your eyes directly to the diamond on this trial?';
 
 show_Instructions(1, instructStr{1}, .1);
 show_Instructions(2, instructStr{2}, .1);
 show_Instructions(3, instructStr{3}, .1);
 show_Instructions(4, instructStr{4}, .1);
+show_Instructions(5, instructStr{5}, .1);
+show_Instructions(6, instructStr{6}, .1);
 
 trialCounter = 0;
 
-% for aa = randperm(4)
-%     understanding_Test(aa, instructStr7, 1);
-%     understanding_Test(aa, ['How much would you receive if you looked at the coloured circle before looking at the diamond on this trial?'], 2);
-% end
-% 
-% TT = [5 6];
-% 
-% for bb = TT(randperm(2));
-%     understanding_Test(bb, instructStr7, 1);
-%     if bb == 5
-%         instructStr8 = ['How much would you receive if you looked at the ' colourName(1,:) ' circle before looking at the diamond on this trial?'];
-%         instructStr9 = ['How much would you receive if you looked at the ' colourName(2,:) ' circle before looking at the diamond on this trial?'];
-%     else
-%         instructStr8 = ['How much would you receive if you looked at the ' colourName(3,:) ' circle before looking at the diamond on this trial?'];
-%         instructStr9 = ['How much would you receive if you looked at the ' colourName(4,:) ' circle before looking at the diamond on this trial?'];
-%     end
-%     understanding_Test(bb, instructStr8, 2);
-%     understanding_Test(bb, instructStr9, 3);
-% end
+for aa = randperm(4)
+    understanding_Test(aa, instructStr7, 1);
+    understanding_Test(aa, ['How much would you receive if you looked at the coloured circle before looking at the diamond on this trial?'], 2);
+end
+
+TT = [5 6];
+
+for bb = TT(randperm(2));
+    understanding_Test(bb, instructStr7, 1);
+    if bb == 5
+        instructStr8 = ['How much would you receive if you looked at the ' colourName(1,:) ' circle before looking at the diamond on this trial?'];
+        instructStr9 = ['How much would you receive if you looked at the ' colourName(2,:) ' circle before looking at the diamond on this trial?'];
+    else
+        instructStr8 = ['How much would you receive if you looked at the ' colourName(3,:) ' circle before looking at the diamond on this trial?'];
+        instructStr9 = ['How much would you receive if you looked at the ' colourName(4,:) ' circle before looking at the diamond on this trial?'];
+    end
+    understanding_Test(bb, instructStr8, 2);
+    understanding_Test(bb, instructStr9, 3);
+end
 
 DrawFormattedText(MainWindow, 'Please tell the experimenter when you are ready to begin', 'center', 'center' , white);
 DrawFormattedText(MainWindow, 'EXPERIMENTER: Press C to recalibrate, T to continue with test', 'center', 800, white);
@@ -83,26 +90,26 @@ Screen('DrawTexture', MainWindow, instrWin, instrBox, destInstrBox);
 if instrTrial == 2
     circSize = 150;
     circleRect(1,:) = [scr_centre(1) - instrBox_width/2 scr_centre(2) scr_centre(1) - instrBox_width/2 + circSize scr_centre(2) + circSize];
-    %circleRect(2,:) = [scr_centre(1) - instrBox_width/2 + circSize + 100 scr_centre(2) scr_centre(1) - instrBox_width/2 + circSize*2 + 100 scr_centre(2) + circSize];
-    circleRect(2,:) = [scr_centre(1) + instrBox_width/2 - circSize scr_centre(2) scr_centre(1) + instrBox_width/2 scr_centre(2) + circSize];
-    %circleRect(4,:) = [scr_centre(1) + instrBox_width/2 - circSize*2 - 100 scr_centre(2) scr_centre(1) + instrBox_width/2 - circSize - 100 scr_centre(2) + circSize];
+    circleRect(2,:) = [scr_centre(1) - instrBox_width/2 + circSize + 100 scr_centre(2) scr_centre(1) - instrBox_width/2 + circSize*2 + 100 scr_centre(2) + circSize];
+    circleRect(3,:) = [scr_centre(1) + instrBox_width/2 - circSize scr_centre(2) scr_centre(1) + instrBox_width/2 scr_centre(2) + circSize];
+    circleRect(4,:) = [scr_centre(1) + instrBox_width/2 - circSize*2 - 100 scr_centre(2) scr_centre(1) + instrBox_width/2 - circSize - 100 scr_centre(2) + circSize];
 end
 
 
 if instrTrial == 2 || instrTrial == 3 || instrTrial == 4 
     
-    highCentre = (circleRect(1,1)+circleRect(1,3))/2;
-    lowCentre = (circleRect(2,1)+circleRect(2,3))/2;  
+    highCentre = (circleRect(1,1)+circleRect(2,3))/2;
+    lowCentre = (circleRect(3,1)+circleRect(4,3))/2;  
     
     
-    highString = ['If ' aOrAn(colourName(1,:)) ' ' strtrim(colourName(1,:)) ' circle is in the display, you will usually receive ' num2str(bigMultiplier) ' points.'];
-    lowString = ['If ' aOrAn(colourName(2,:)) ' ' strtrim(colourName(2,:)) ' circle is in the display, you will usually receive ' num2str(smallMultiplier) ' points.'];
+    highString = ['If ' aOrAn(colourName(1,:)) ' ' strtrim(colourName(1,:)) ' or ' strtrim(colourName(2,:)) ' circle is in the display, you will usually receive ' num2str(bigMultiplier) ' points.'];
+    lowString = ['If ' aOrAn(colourName(3,:)) ' ' strtrim(colourName(3,:)) ' or ' strtrim(colourName(4,:)) ' circle is in the display, you will usually receive ' num2str(smallMultiplier) ' points.'];
 
     
     Screen('FillOval', MainWindow, distract_col(1,1:3), circleRect(1,:));
     Screen('FillOval', MainWindow, distract_col(2,1:3), circleRect(2,:));
-    %Screen('FillOval', MainWindow, distract_col(3,1:3), circleRect(4,:));
-    %Screen('FillOval', MainWindow, distract_col(4,1:3), circleRect(3,:));
+    Screen('FillOval', MainWindow, distract_col(3,1:3), circleRect(4,:));
+    Screen('FillOval', MainWindow, distract_col(4,1:3), circleRect(3,:));
     
     [~, ny, highBox] = DrawFormattedText(instrWin, highString, 'left', ny+100 , textColour, 35, [], [], 1.5);
     highBox_width = highBox(3) - highBox(1);

@@ -10,7 +10,7 @@ global stim_size
 
 awareTest_iti = 1;
 
-testColours = 4;
+testColours = 2;
 
 perfectDiam = stim_size + 10;   % Used in FillOval to increase drawing speed
 
