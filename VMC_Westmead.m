@@ -28,7 +28,7 @@ global laptopVersion viewDistance monitorDims
 
 eyeVersion = false; % set to true to test eyetracking
 realVersion = false; % set to true for correct numbers of trials etc.
-laptopVersion = false; % set to true to scale stimuli for laptop screen dimensions
+laptopVersion = true; % set to true to scale stimuli for laptop screen dimensions
 
 commandwindow;
 
@@ -47,15 +47,20 @@ end
 if laptopVersion
     DPI = 96; % will probably need to change
     viewDistance = 60; %viewing distance in cm
+    screenDiagonal = 39.624; %15.6 inches = 39.624 cm
+    screenRatio = [16 9]; %16:9 screen ratio
+    screenHeight = screenDiagonal*screenRatio(2)/sqrt(16^2 + 9^2);
+    screenWidth = (16/9)*screenHeight;
 else
     DPI = 96;
     viewDistance = 60; %viewing distance in cm
+    screenDiagonal = 58.42; %23 inches = 58.42 cm
+    screenRatio = [16 9]; %16:9 screen ratio
+    screenHeight = screenDiagonal*screenRatio(2)/sqrt(16^2 + 9^2);
+    screenWidth = (16/9)*screenHeight;
 end
 
-set(0, 'ScreenPixelsPerInch', DPI);
-set(0, 'units', 'centimeters');
-monitorDims = get(0, 'screensize');
-monitorDims = monitorDims(3:4);
+monitorDims = [screenWidth screenHeight];
 
 bigMultiplier = 500;    % Points multiplier for trials with high-value distractor
 smallMultiplier = 10;   % Points multiplier for trials with low-value distractor
