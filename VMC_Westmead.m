@@ -20,14 +20,15 @@ global bigMultiplier smallMultiplier
 global calibrationNum
 global awareInstrPause
 global starting_total starting_total_points
-global orange green blue pink sessionPoints
+global orange green blue pink sessionPay
+global EGdataFilenameBase
 
 global realVersion
 global eyeVersion
 global laptopVersion viewDistance monitorDims
 
-eyeVersion = false; % set to true to test eyetracking
-realVersion = false; % set to true for correct numbers of trials etc.
+eyeVersion = true; % set to true to test eyetracking
+realVersion = true; % set to true for correct numbers of trials etc.
 laptopVersion = true; % set to true to scale stimuli for laptop screen dimensions
 
 commandwindow;
@@ -38,7 +39,7 @@ if realVersion
     awareInstrPause = 18;
 else
     screens = Screen('Screens');
-    screenNum = 1; %max(screens);
+    screenNum = max(screens);
     Screen('Preference', 'SkipSyncTests', 2); %Skips PTB calibrations
     fprintf('\n\nEXPERIMENT IS BEING RUN IN DEBUGGING MODE!!! IF YOU ARE RUNNING A ''REAL'' EXPT, QUIT AND CHANGE realVersion TO true\n\n');
     awareInstrPause = 1;
@@ -98,6 +99,12 @@ end
 if exist('BehavData', 'dir') == 0
     mkdir('BehavData');
 end
+if exist('BehavData\control', 'dir') == 0
+    mkdir('BehavData', 'control');
+end
+if exist('BehavData\patient', 'dir') == 0
+    mkdir('BehavData', 'patient');
+end
 if exist('CalibrationData', 'dir') == 0
     mkdir('CalibrationData');
 end
@@ -120,16 +127,16 @@ if realVersion
             if isempty(group);
                 group = 'a';
             elseif group == 'y' || group == 'Y'
-                 groupFileEnd = '_C';
+                 groupFolder = 'control';
                  p_group = 2; % 2 = control
             elseif group == 'n' || group == 'N'
-                groupFileEnd = '_P';
+                groupFolder = 'patient';
                 p_group = 1; % 1 = patient
             end
         end
         
         
-        datafilename = ['BehavData\VMC_Westmead_dataP', num2str(p_number), groupFileEnd];
+        datafilename = ['BehavData\', groupFolder, '\VMC_Westmead_dataP', num2str(p_number)];
         
         
         if exist([datafilename, '.mat'], 'file') == 2
@@ -203,16 +210,16 @@ DATA.actualBonusSession = 0;
 if eyeVersion
     EGfolderName = 'Data\EyeData';
     if p_group == 1
-        EGgroupfolderNameString = 'Pat';
+        EGgroupfolderNameString = 'patient';
     else
-        EGgroupfolderNameString = 'Con';
+        EGgroupfolderNameString = 'control';
     end
-    EGsubfolderNameString = ['\P', num2str(p_number)];
+    EGsubfolderNameString = ['P', num2str(p_number)];
     if exist([EGfolderName,'\', EGgroupfolderNameString], 'dir') ~= 7
         mkdir(EGfolderName, EGgroupfolderNameString);
-    end        
-    mkdir(EGgroupfolderNameString, EGsubfolderNameString);
-    EGdataFilenameBase = [EGfolderName, '\', EGgroupfolderNameString, EGsubfolderNameString, '\GazeData', EGsubfolderNameString];
+    end       
+    EGdataFilenameBase = [EGfolderName, '\', EGgroupfolderNameString,'\', EGsubfolderNameString];
+    mkdir(EGdataFilenameBase);
 end
 
 % *******************************************************
@@ -264,7 +271,7 @@ end
 
 phaseLength = zeros(3,1);
 
-sessionPoints = 0;
+sessionPay = 0;
  
 initialInstructions;
 
@@ -315,7 +322,7 @@ awareTest;
 %sessionBonus = sessionBonus / 100;    % ... then convert back to dollars
 
 %DATA.session_Bonus = sessionBonus;
-DATA.session_Points = sessionPoints;
+DATA.session_Points = sessionPay;
 
 %totalBonus = starting_total + sessionBonus;
 
@@ -331,10 +338,10 @@ DATA.end_time = datestr(now,0);
 
 save(datafilename, 'DATA');
 
-[~, ny, ~] = DrawFormattedText(MainWindow, ['SESSION COMPLETE\n\nPoints in this session = ', separatethousands(sessionPoints, ',')], 'center', 'center' , white, [], [], [], 1.4);
+[~, ny, ~] = DrawFormattedText(MainWindow, ['SESSION COMPLETE\n\nPoints in this session = ', separatethousands(sessionPay, ',')], 'center', 'center' , white, [], [], [], 1.4);
 
 fid1 = fopen('BehavData\_TotalBonus_summary.csv', 'a');
-fprintf(fid1,'%d,%f\n', p_number, sessionPoints);
+fprintf(fid1,'%d,%f\n', p_number, sessionPay);
 fclose(fid1);
 
 DrawFormattedText(MainWindow, '\n\nPlease fetch the experimenter', 'center', ny , white, [], [], [], 1.5);
@@ -342,7 +349,7 @@ DrawFormattedText(MainWindow, '\n\nPlease fetch the experimenter', 'center', ny 
 Screen(MainWindow, 'Flip');
 
 if eyeVersion
-    overallEGdataFilename = [EGfolderName, '\', EGgroupfolderNameString, '\GazeData', EGsubfolderNameString, '.mat'];
+    overallEGdataFilename = [EGfolderName, '\', EGgroupfolderNameString, '\', EGsubfolderNameString, '.mat'];
     
     minPhase = 2;
     maxPhase = 2;
@@ -350,15 +357,20 @@ if eyeVersion
     for exptPhase = minPhase:maxPhase
         
         for trial = 1:phaseLength(exptPhase)
-            inputFilename = [EGdataFilenameBase, 'Ph', num2str(exptPhase), 'T', num2str(trial), '.mat'];
+            inputFileBase = [EGdataFilenameBase, '\Ph', num2str(exptPhase), 'T', num2str(trial)];
+            inputFilename = [inputFileBase, '.mat'];
             load(inputFilename);
             ALLGAZEDATA.EGdataPhase(exptPhase).EGdataTrial(trial).data = GAZEDATA;
+            fixFilename = [inputFileBase, '_FIX.mat'];
+            load(fixFilename);
+            ALLGAZEDATA.EGdataPhase(exptPhase).EGdataTrial(trial).fixData = FIXDATA;
             clear GAZEDATA;
+            clear FIXDATA;
         end
     end
     
     save(overallEGdataFilename, 'ALLGAZEDATA');
-    rmdir([EGfolderName,'\', EGgroupfolderNameString, EGsubfolderNameString], 's');
+    rmdir([EGfolderName,'\', EGgroupfolderNameString, '\',EGsubfolderNameString], 's');
 end
 
 RestrictKeysForKbCheck(KbName('q'));   % Only accept Q key to quit

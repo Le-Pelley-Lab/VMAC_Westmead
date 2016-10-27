@@ -5,14 +5,15 @@ global distract_col colourName
 global white black gray yellow
 global bigMultiplier smallMultiplier
 global centOrCents
-global stim_size
 
 
 awareTest_iti = 1;
 
 testColours = 2;
 
-perfectDiam = stim_size + 10;   % Used in FillOval to increase drawing speed
+awareStim_size = 92;
+
+perfectDiam = awareStim_size + 10;   % Used in FillOval to increase drawing speed
 
 
 valButtonWidth = 300;
@@ -132,7 +133,7 @@ for trial = 1 : testColours
             distractorColour = distract_col(4,1:3);
     end
     
-    Screen('FillOval', MainWindow, distractorColour, [scr_centre(1) - stim_size / 2,    circle_top,   scr_centre(1) + stim_size / 2,    circle_top + stim_size], perfectDiam);
+    Screen('FillOval', MainWindow, distractorColour, [scr_centre(1) - awareStim_size / 2,    circle_top,   scr_centre(1) + awareStim_size / 2,    circle_top + awareStim_size], perfectDiam);
     
     for i = 1 : 3
         Screen('DrawTexture', MainWindow, valButtonWin(i), [], valButtonRect(i,:));

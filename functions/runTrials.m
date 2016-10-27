@@ -1,5 +1,5 @@
 
-function sessionPay = runTrials(exptPhase)
+function trial= runTrials(exptPhase)
 
 global MainWindow
 global scr_centre DATA datafilename
@@ -10,8 +10,10 @@ global stim_size stimLocs
 global stimCentre aoiRadius
 global fix_aoi_radius
 global awareInstrPause
-global starting_total_points colourName
+global starting_total_points
 global realVersion eyeVersion
+global EGdataFilenameBase
+global sessionPay
 
 gamma = 0.2;    % Controls smoothing of displayed gaze location. Lower values give more smoothing
 
@@ -60,6 +62,7 @@ else
     
     initialPause = 0.005;
     breakDuration = 2;
+    awareInstrPause = 1;  % 16
     
     requiredFixationTime = 0.005;
     omissionTimeLimit = 0;          % Dwell time on distractor that means this will be an omission trial
@@ -281,7 +284,7 @@ for trial = 1 : numTrials
     fixationBadSamples = 0;
     fixationTimeout = 0;
     gazeCycle = 0;
-    arrayRowCounter = 2;    % Used to write EG data to the correct rows of an array. Starts at 2 because we write the first row in separately below (line marked ***)
+    fixArrayRowCounter = 2;    % Used to write EG data to the correct rows of an array. Starts at 2 because we write the first row in separately below (line marked ***)
     
     startFixationTime = Screen(MainWindow, 'Flip', [], 1);     % Present fixation cross
     
@@ -561,13 +564,13 @@ for trial = 1 : numTrials
     
     DATA.fixationTimeouts(exptPhase) = DATA.fixationTimeouts(exptPhase) + fixationTimeout;
     DATA.trialTimeouts(exptPhase) = DATA.trialTimeouts(exptPhase) + timeout;
-    DATA.sessionPayment = sessionPay;
+    DATA.sessionPayment(exptPhase) = sessionPay;
     
     save(datafilename, 'DATA');
     
     if savingGazeData
-        EGdatafilename = [EGdataFilenameBase, 'Ph', num2str(exptPhase), 'T', num2str(trial), '.mat'];
-        FIXdatafilename = [EGdataFilenameBase, 'Ph', num2str(exptPhase), 'T', num2str(trial), '_FIX.mat'];
+        EGdatafilename = [EGdataFilenameBase, '\Ph', num2str(exptPhase), 'T', num2str(trial), '.mat'];
+        FIXdatafilename = [EGdataFilenameBase, '\Ph', num2str(exptPhase), 'T', num2str(trial), '_FIX.mat'];
         FIXDATA = fixEGarray(1:fixArrayRowCounter-1,:);
         GAZEDATA = trialEGarray(1:arrayRowCounter-1,:);
         save(EGdatafilename, 'GAZEDATA');
@@ -754,7 +757,7 @@ end
 
 RestrictKeysForKbCheck(KbName('Space'));   % Only accept spacebar
 
-DrawFormattedText(MainWindow, 'Please put your chin back in the chinrest,\nand press the spacebar when you are ready to continue', 'center', 'center' , white, [], [], [], 1.5);
+DrawFormattedText(MainWindow, 'Please centre yourself in front of the screen and press the spacebar when you are ready to continue', 'center', 'center' , white, [], [], [], 1.5);
 Screen(MainWindow, 'Flip');
 
 KbWait([], 2);

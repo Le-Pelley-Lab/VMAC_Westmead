@@ -5,7 +5,7 @@ global bigMultiplier smallMultiplier
 global centOrCents
 global awareInstrPause
 
-instructStr1 = ['The eye tracking task is now finished - it''s fine to take your chin out of the chin rest.\n\nDuring this task, the amount that you could win on each trial was determined by the colour of the coloured circle that appeared on that trial. When certain colours appeared in the display, you could win ', num2str(smallMultiplier), ' ', centOrCents, ', and when other colours appeared you could win ', num2str(bigMultiplier), ' points.'];
+instructStr1 = ['The eye tracking task is now finished.\n\nDuring this task, the amount that you could win on each trial was determined by the colour of the coloured circle that appeared on that trial. When certain colours appeared in the display, you could win ', num2str(smallMultiplier), ' ', centOrCents, ', and when other colours appeared you could win ', num2str(bigMultiplier), ' points.'];
 instructStr1 = [instructStr1, '\n\nIn the final phase we will test what you remember about the different colours of circles.'];
 
 show_Instructions(1, instructStr1, 12);
