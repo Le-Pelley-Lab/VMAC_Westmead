@@ -20,9 +20,9 @@ gamma = 0.2;    % Controls smoothing of displayed gaze location. Lower values gi
 if realVersion
     
     
-    softTimeoutDuration = 1;     % soft timeout limit for later trials
+    startSoftTimeoutDuration = 2;     % soft timeout limit for later trials
     
-    timeoutDuration = [4, 2, 2];     % [4, 2] timeout duration
+    timeoutDuration = [4, 4, 4];     % [4, 2] timeout duration
     fixationTimeoutDuration = 4;    % 5 fixation timeout duration
     
     iti = 0.7;            % 0.7
@@ -50,7 +50,7 @@ if realVersion
     
 else
     
-    softTimeoutDuration = 2;
+    startSoftTimeoutDuration = 2;
     timeoutDuration = [4, 2, 2];
     fixationTimeoutDuration = 4;
     
@@ -138,6 +138,10 @@ shTrialTypeArray = shuffleTrialorder(trialTypeArray, exptPhase);
 
 exptTrialsBeforeBreak = exptTrialsPerBlock * blocksPerBreak;
 
+rtTracker = zeros(1,exptTrialsPerBlock);
+
+
+
 if ~eyeVersion
     ShowCursor('Arrow');
 end
@@ -218,6 +222,10 @@ end
 WaitSecs(initialPause);
 
 for trial = 1 : numTrials
+    
+    if block == 1
+        softTimeoutThreshold = startSoftTimeoutDuration;
+    end
     
     trialCounter = trialCounter + 1;    % This is used to set distractor type below; it can cycle independently of trial
     trials_since_break = trials_since_break + 1;
@@ -480,6 +488,8 @@ for trial = 1 : numTrials
     
     rt = GetSecs - startTrialTime;      % Response time
     
+    rtTracker(trialCounter) = rt; % store RT in tracker to be used for soft timeout threshold
+    
     Screen('Flip', MainWindow);
     
     trialPropGoodSamples = 1 - double(trialBadSamples) / double(gazeCycle);
@@ -509,7 +519,7 @@ for trial = 1 : numTrials
             end
 
             
-            if rt > softTimeoutDuration      % If RT is greater than the "soft" timeout limit, don't get reward (but also don't get explicit timeout feedback)
+            if rt > softTimeoutThreshold      % If RT is greater than the "soft" timeout limit, don't get reward (but also don't get explicit timeout feedback)
                 softTimeoutTrial = 1;
             end
             
@@ -555,7 +565,7 @@ for trial = 1 : numTrials
     %     Screen('Flip', MainWindow);
     %     WaitSecs(iti);
     
-    trialData = [block, trial, trialCounter, trials_since_break, targetLoc, distractLoc, fixationTime, fixationPropGoodSamples, fixationTimeout, trialPropGoodSamples, timeout, softTimeoutTrial, omissionTrial, rt, trialPay, sessionPay, distractType, timeOnLoc(1,:)];
+    trialData = [block, trial, trialCounter, trials_since_break, targetLoc, distractLoc, fixationTime, fixationPropGoodSamples, fixationTimeout, trialPropGoodSamples, timeout, softTimeoutTrial, softTimeoutThreshold, omissionTrial, rt, trialPay, sessionPay, distractType, timeOnLoc(1,:)];
     
     if trial == 1
         DATA.trialInfo(exptPhase).trialData = zeros(numTrials, size(trialData, 2));
@@ -605,6 +615,8 @@ for trial = 1 : numTrials
         %omissionCounter = zeros(8,1);
         DATA.blocksCompleted = block;
         block = block + 1;
+        softTimeoutThreshold = prctile(rtTracker,90);   % find the 90th percentile of the RTs from the previous block, use this as the soft timeout threshold.
+        rtTracker = zeros(1,exptTrialsPerBlock);
         %if exptPhase > 1
          %   omissionTracker(2,:) = omissionTracker(1,randperm(length(omissionTracker(1,:)))); %randomise order of high val trials for irrelevant cue
           %  omissionTracker(4,:) = omissionTracker(3,randperm(length(omissionTracker(3,:)))); %randomise order of low val trials for irrelevant cue
@@ -757,8 +769,12 @@ end
 
 RestrictKeysForKbCheck(KbName('Space'));   % Only accept spacebar
 
-DrawFormattedText(MainWindow, 'Please centre yourself in front of the screen and press the spacebar when you are ready to continue', 'center', 'center' , white, [], [], [], 1.5);
+oldSize = Screen('TextSize', MainWindow, 32);
+
+DrawFormattedText(MainWindow, 'Please centre yourself in front of the screen.\n\nPress the spacebar when you are ready to continue', 'center', 'center' , white, [], [], [], 1.5);
 Screen(MainWindow, 'Flip');
+
+Screen('TextSize', MainWindow, oldSize);
 
 KbWait([], 2);
 Screen(MainWindow, 'Flip');

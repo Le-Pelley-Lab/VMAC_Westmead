@@ -27,7 +27,7 @@ global realVersion
 global eyeVersion
 global laptopVersion viewDistance monitorDims
 
-eyeVersion = true; % set to true to test eyetracking
+eyeVersion = false % set to true to test eyetracking
 realVersion = true; % set to true for correct numbers of trials etc.
 laptopVersion = true; % set to true to scale stimuli for laptop screen dimensions
 
