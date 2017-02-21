@@ -11,8 +11,8 @@ global trialCounter
 instructStr = {'The rest of this experiment is similar to the trials you have just completed. On each trial, you should move your eyes to the DIAMOND shape as quickly and directly as possible.', ...
     ['From now on, you will be able to earn points for correct responses. On each trial you will earn either 0 points, ', num2str(smallMultiplier), ' ', centOrCents, ', or ', num2str(bigMultiplier), ...
     ' points. \n\nThe amount that is available for you to earn will depend on the coloured circle(s) that are presented on the trial: '], ...
-    ['If you take longer than ', num2str(round(softTimeoutDuration * 1000)), ' milliseconds to move your eyes to the diamond, you will receive no points. So you will need to move your eyes quickly!'], ...
-    'After each trial you will be told how many points you won, and your total points earned so far in this session.\n\nYour aim in this task is to earn as many points as possible.'};
+    'If you are too slow to move your eyes to the diamond, you will receive no points. So you will need to move your eyes quickly!', ...
+    'After each trial you will be told how many points you won, and your total points earned so far in this session.\n\nYour aim is to earn as many points as possible.'};
 
 
 show_Instructions(1, instructStr{1}, .1);
@@ -95,8 +95,8 @@ if instrTrial == 2 || instrTrial == 3 || instrTrial == 4
     lowCentre = (circleRect(2,1)+circleRect(2,3))/2;  
     
     
-    highString = ['If ' aOrAn(colourName(1,:)) ' ' strtrim(colourName(1,:)) ' circle is in the display, you will usually receive ' num2str(bigMultiplier) ' points.'];
-    lowString = ['If ' aOrAn(colourName(2,:)) ' ' strtrim(colourName(2,:)) ' circle is in the display, you will usually receive ' num2str(smallMultiplier) ' points.'];
+    highString = ['If ' aOrAn(colourName(1,:)) ' ' strtrim(colourName(1,:)) ' circle is in the display, you will usually win ' num2str(bigMultiplier) ' points.'];
+    lowString = ['If ' aOrAn(colourName(2,:)) ' ' strtrim(colourName(2,:)) ' circle is in the display, you will usually win ' num2str(smallMultiplier) ' points.'];
 
     
     Screen('FillOval', MainWindow, distract_col(1,1:3), circleRect(1,:));
