@@ -13,9 +13,14 @@ global awareInstrPause
 global starting_total_points
 global realVersion eyeVersion
 global EGdataFilenameBase
-global sessionPay
+global sessionPay laptopVersion extraBreakCounter
 
-gamma = 0.2;    % Controls smoothing of displayed gaze location. Lower values give more smoothing
+if laptopVersion
+    gamma = 0.1;
+else
+    gamma = 0.2;    % Controls smoothing of displayed gaze location. Lower values give more smoothing
+end
+
 
 if realVersion
     
@@ -43,7 +48,7 @@ if realVersion
     pracTrials = 8;
     numExptBlocksPhase = [1, 8]; %Phase 1 = practice, Phase 2 = mixed single and double distractor, Phase 3 = double distractor only
     
-    blocksPerBreak = 2;
+    blocksPerBreak = 1;
     
     singlePerBlock = [0, 12];
     %doublePerBlock = [0, 4, 11];
@@ -85,6 +90,7 @@ if exptPhase == 1
     exptTrialsPerBlock = pracTrials;
     trialTypeArray = ones(exptTrialsPerBlock, 1) * distractorType;
     winMultiplier = 0;
+    extraBreakCounter = 0;
 else
     
     if eyeVersion
@@ -587,26 +593,44 @@ for trial = 1 : numTrials
         save(FIXdatafilename, 'FIXDATA');
     end
     
-    RestrictKeysForKbCheck(KbName('c'));
+    RestrictKeysForKbCheck([KbName('c'), KbName('b'), KbName('F7')]);
     startITItime = Screen('Flip', MainWindow);
     
     [~, keyCode, ~] = KbWait([], 2, startITItime + iti);    % Wait for ITI duration while monitoring keyboard
-    
+    keyCodePressed = find(keyCode, 1, 'first');
+    keyPressed = KbName(keyCodePressed);
     RestrictKeysForKbCheck([]);
     
     % If pressed C during ITI period, run an extraordinary calibration, otherwise
     % carry on with the experiment
     if sum(keyCode) > 0
-        if eyeVersion
-            try
-                tetio_stopTracking;
-            catch ME
-                a = 1;
+        if keyPressed == 'c' %run an additional calibration
+            if eyeVersion
+                try
+                    tetio_stopTracking;
+                catch ME
+                    a = 1;
+                end
+                runPTBcalibration;
+                tetio_startTracking;
+                WaitSecs(initialPause);
             end
-            runPTBcalibration;
-            tetio_startTracking;
-            WaitSecs(initialPause);
+        elseif keyPressed == 'b' % take an extra break if needed
+            take_a_break(breakDuration, initialPause, 0, sessionPay, block, numExptBlocksPhase(exptPhase));
+            trials_since_break = 0;
+            extraBreakCounter = extraBreakCounter + 1;
+        else % f7 to abort program, save all current data etc.
+            return;
         end
+    end
+    
+    
+    
+    if (mod(trial, exptTrialsBeforeBreak) == 0 && trial ~= numTrials);
+        %             save(datafilename, 'DATA');
+        
+        take_a_break(breakDuration, initialPause, 0, sessionPay, block, numExptBlocksPhase(exptPhase)); %removed the additional calibrations that would occur throughout expt 14/01/16
+        trials_since_break = 0;
     end
     
     if mod(trial, exptTrialsPerBlock) == 0
@@ -623,13 +647,6 @@ for trial = 1 : numTrials
            % omissionTracker([1,3,5:8],:) = zeros(6,numSingleDistractPerBlock);
         %end
         %Beeper;
-    end
-    
-    if (mod(trial, exptTrialsBeforeBreak) == 0 && trial ~= numTrials);
-        %             save(datafilename, 'DATA');
-        
-        take_a_break(breakDuration, initialPause, 0, sessionPay); %removed the additional calibrations that would occur throughout expt 14/01/16
-        trials_since_break = 0;
     end
     
 end
@@ -743,7 +760,7 @@ end
 
 
 
-function take_a_break(breakDur, pauseDur, runCalib, totalPointsSoFar)
+function take_a_break(breakDur, pauseDur, runCalib, totalPointsSoFar, currBlock, totalBlocks)
 
 global MainWindow white
 
@@ -752,6 +769,12 @@ if runCalib == 0
     [~, ny, ~] = DrawFormattedText(MainWindow, ['Time for a break\n\nSit back, relax for a moment! You will be able to carry on in ', num2str(breakDur),' seconds\n\nRemember that you should be trying to move your eyes to the diamond as quickly and as accurately as possible!'], 'center', 'center', white, 50, [], [], 1.5);
     
     DrawFormattedText(MainWindow, ['Total so far = ', separatethousands(totalPointsSoFar, ','), ' points'], 'center', ny + 150, white, 50, [],[], 1.5);
+    
+    oldSize = Screen('TextSize', MainWindow, 16);
+    
+    DrawFormattedText(MainWindow, [num2str(currBlock), '/', num2str(totalBlocks)], 'right', 100, white, 50, [], [], 1.5, [], [0 0 1880 1080]);
+    
+    Screen('TextSize', MainWindow, oldSize);
     
     Screen(MainWindow, 'Flip');
     WaitSecs(breakDur);
@@ -763,7 +786,7 @@ else
     RestrictKeysForKbCheck(KbName('c'));   % Only accept C key to begin calibration
     KbWait([], 2);
     RestrictKeysForKbCheck([]);   % Re-enable all keys
-    runCalibration;
+    runPTBcalibration;
     
 end
 

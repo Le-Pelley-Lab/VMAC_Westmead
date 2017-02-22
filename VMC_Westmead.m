@@ -27,7 +27,7 @@ global realVersion
 global eyeVersion
 global laptopVersion viewDistance monitorDims
 
-eyeVersion = false % set to true to test eyetracking
+eyeVersion = true; % set to true to test eyetracking
 realVersion = true; % set to true for correct numbers of trials etc.
 laptopVersion = true; % set to true to scale stimuli for laptop screen dimensions
 
@@ -276,7 +276,7 @@ sessionPay = 0;
 initialInstructions;
 
 if eyeVersion
-    runCalibration;
+    runPTBcalibration;
 end
 
 pressSpaceToBegin;
@@ -380,6 +380,8 @@ rmpath(genpath(functionFoldername));       % Then add path to this folder and al
 Snd('Close');
 
 Screen('Preference', 'SkipSyncTests',0);
+
+tetio_stopTracking
 
 Screen('CloseAll');
 
