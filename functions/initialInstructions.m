@@ -3,10 +3,10 @@ function initialInstructions()
 
 global MainWindow white
 
-instructStr1 = ['On each trial a cross will appear inside a circle, and a yellow spot will show you where the computer thinks your eyes are looking.',...
-' You should fix your eyes on the cross. After a short time the cross will turn yellow and the spot will disappear - this shows that the trial is about to start.',...
-' You should keep your eyes fixed in the middle of the screen until the trial starts.'];
-instructStr2 = 'Then a set of shapes will appear; an example is shown below. Your task is to move your eyes to look at the DIAMOND shape as quickly and as directly as possible.';
+instructStr1 = ['On each trial you will see a cross with a circle around it in the centre of the screen, and a yellow spot will show you where the computer thinks your eyes are looking.',...
+' You should fix your eyes on the cross. After you do this, the cross will turn yellow and the spot will disappear - this shows that the trial is about to start.',...
+' You should keep your eyes fixed on the cross until the trial starts.'];
+instructStr2 = 'Then some shapes will appear like in the picture below. Your task is to move your eyes to look at the DIAMOND shape as quickly and as directly as possible.';
 
 show_Instructions(1, instructStr1);
 show_Instructions(2, instructStr2);

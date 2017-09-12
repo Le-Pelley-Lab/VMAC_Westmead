@@ -322,7 +322,31 @@ awareTest;
 %sessionBonus = sessionBonus / 100;    % ... then convert back to dollars
 
 %DATA.session_Bonus = sessionBonus;
+numExptBlocks = 8;
+singlePerBlock = 12;
+
 DATA.session_Points = sessionPay;
+theoryMaxPoints = (bigMultiplier + smallMultiplier)*(numExptBlocks * singlePerBlock);
+
+dividingFactor = theoryMaxPoints/1000;
+sessionBonus = sessionPay / dividingFactor;
+
+sessionBonus = 10 * ceil(sessionBonus/10);
+sessionBonus = sessionBonus / 100;
+
+DATA.session_Bonus = sessionBonus;
+
+totalBonus = sessionBonus;
+
+if totalBonus < 7.10
+    actual_bonus_payment = 5.10;
+elseif totalBonus > 10.00
+    actual_bonus_payment = 10.00;
+else
+    actual_bonus_payment = totalBonus;
+end
+
+DATA.actualBonus = actual_bonus_payment;
 
 %totalBonus = starting_total + sessionBonus;
 
@@ -338,7 +362,7 @@ DATA.end_time = datestr(now,0);
 
 save(datafilename, 'DATA');
 
-[~, ny, ~] = DrawFormattedText(MainWindow, ['SESSION COMPLETE\n\nPoints in this session = ', separatethousands(sessionPay, ',')], 'center', 'center' , white, [], [], [], 1.4);
+[~, ny, ~] = DrawFormattedText(MainWindow, ['SESSION COMPLETE\n\nPoints in this session = ', separatethousands(sessionPay, ','), '\n\nTOTAL BONUS = $', num2str(actual_bonus_payment, '%0.2f')], 'center', 'center' , white, [], [], [], 1.4);
 
 fid1 = fopen('BehavData\_TotalBonus_summary.csv', 'a');
 fprintf(fid1,'%d,%f\n', p_number, sessionPay);
@@ -376,12 +400,14 @@ end
 RestrictKeysForKbCheck(KbName('q'));   % Only accept Q key to quit
 KbWait([], 2);
 
+tetio_stopTracking
+
 rmpath(genpath(functionFoldername));       % Then add path to this folder and all subfolders
 Snd('Close');
 
 Screen('Preference', 'SkipSyncTests',0);
 
-tetio_stopTracking
+
 
 Screen('CloseAll');
 
