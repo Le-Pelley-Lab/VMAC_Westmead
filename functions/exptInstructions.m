@@ -8,17 +8,19 @@ global softTimeoutDuration colourName
 global trialCounter
 
 
-instructStr = {'The rest of this experiment is similar to the trials you have just completed. On each trial, you should move your eyes to the DIAMOND shape as quickly and directly as possible.', ...
-    ['From now on, you will be able to earn points for correct responses. On each trial you will earn either 0 points, ', num2str(smallMultiplier), ' ', centOrCents, ', or ', num2str(bigMultiplier), ...
-    ' points. \n\nThe amount that you can win will depend on the coloured circle(s) that are presented on the trial: '], ...
-    'If you are too slow to move your eyes to the diamond, you will receive no points. So you will need to move your eyes quickly!', ...
-    'After each trial you will be told how many points you won, and your total points earned so far in this session.\n\nYour aim is to earn as many points as possible.'};
+instructStr = {'The rest of this experiment is similar to what you have just done. On each trial, you should move your eyes to the DIAMOND shape as quickly and directly as possible.', ...
+    ['From now on, you will be able to earn points for moving your eyes to the diamond. On each trial you will earn either 0 points, ', num2str(smallMultiplier), ' ', centOrCents, ', or ', num2str(bigMultiplier), ...
+    ' points. \n\nThe amount that you can win will depend on the coloured circle that is on the screen: '], ...
+    'If you move your eyes to the diamond too slowly, you will not win any points.\n\nSo you will need to move your eyes quickly!', ...
+    'If you accidentally look at the coloured circle before you look at the diamond, you will not win any points.\n\nSo you will need to move your eyes straight to the diamond!', ...
+    'After each trial you will see how many points you won, and your total points earned so far.\n\nAt the end of the task, these points will be converted into a cash bonus of $5-$10. So the more points you collect, the more money you will win!'};
 
 
 show_Instructions(1, instructStr{1}, .1);
 show_Instructions(2, instructStr{2}, .1);
 show_Instructions(3, instructStr{3}, .1);
 show_Instructions(4, instructStr{4}, .1);
+show_Instructions(5, instructStr{5}, .1);
 
 trialCounter = 0;
 
@@ -89,14 +91,14 @@ if instrTrial == 2
 end
 
 
-if instrTrial == 2 || instrTrial == 3 || instrTrial == 4 
+if instrTrial == 2 || instrTrial == 3 || instrTrial == 4 || instrTrial == 5
     
     highCentre = (circleRect(1,1)+circleRect(1,3))/2;
     lowCentre = (circleRect(2,1)+circleRect(2,3))/2;  
     
     
-    highString = ['If ' aOrAn(colourName(1,:)) ' ' strtrim(colourName(1,:)) ' circle is in the display, you will usually win ' num2str(bigMultiplier) ' points.'];
-    lowString = ['If ' aOrAn(colourName(2,:)) ' ' strtrim(colourName(2,:)) ' circle is in the display, you will usually win ' num2str(smallMultiplier) ' points.'];
+    highString = ['If ' aOrAn(colourName(1,:)) ' ' strtrim(colourName(1,:)) ' circle is on screen, you will usually win ' num2str(bigMultiplier) ' points.'];
+    lowString = ['If ' aOrAn(colourName(2,:)) ' ' strtrim(colourName(2,:)) ' circle is on screen, you will usually win ' num2str(smallMultiplier) ' points.'];
 
     
     Screen('FillOval', MainWindow, distract_col(1,1:3), circleRect(1,:));
@@ -117,12 +119,12 @@ if instrTrial == 2 || instrTrial == 3 || instrTrial == 4
     
     Screen('DrawTexture', MainWindow, instrWin, highBox, destHighBox);
     Screen('DrawTexture', MainWindow, instrWin, lowBox, destLowBox);
-
-elseif instrTrial == 5
-    
-    imageFilename = 'ORANGEBLUE.jpg';
-    ima = imread(imageFilename, 'jpg');
-    Screen('PutImage', MainWindow, ima, exImageRect);
+% 
+% elseif instrTrial == 5
+%     
+%     imageFilename = 'ORANGEBLUE.jpg';
+%     ima = imread(imageFilename, 'jpg');
+%     Screen('PutImage', MainWindow, ima, exImageRect);
 
 end
 % if instrTrial == 4
